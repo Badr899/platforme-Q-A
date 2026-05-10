@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Connexion</title>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/logine.css' %}"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.07L2 22l4.93-1.37A9.96 9.96 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm1 14H9v-2h4v2zm2-4H9V8h6v4z"/></svg>
+    </div>
+    <div class="brand-name">Ask<span>Q&A</span></div>
+  </div>
+
+  <div class="welcome">
+    <h1>Bon retour ! 😊</h1>
+    <p>Connectez-vous pour poser vos questions et aider la communauté.</p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="email">Adresse email</label>
+      <div class="input-wrap">
+        <span class="icon">✉️</span>
+        <input type="email" id="email" name="email" placeholder="ex: john@mail.com" required/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Mot de passe</label>
+      <div class="input-wrap">
+        <span class="icon">🔒</span>
+        <input type="password" id="password" name="password" placeholder="Votre mot de passe" required/>
+      </div>
+      <p class="forgot"><a href="#">Mot de passe oublié ?</a></p>
+    </div>
+
+    <button type="submit" class="btn">Se connecter 👋</button>
+  </form>
+
+  <p class="footer-text">
+    Pas encore de compte ? <a href="{% url 'register' %}">S'inscrire</a>
+  </p>
+
+</div>
+
+</body>
+</html>

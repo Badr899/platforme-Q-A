@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Commentaires</title>
+    <link rel="stylesheet" href="{% static 'css/admine_dash.css' %}">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">Q</span>
+            <span class="logo-text">A Platform</span>
+            <span class="admin-badge">Admin</span>
+        </div>
+
+        <nav class="nav">
+            <a href="{% url 'admin_dashboard' %}" class="nav-link">Dashboard</a>
+            <a href="{% url 'logout' %}" class="nav-link logout">Logout</a>
+        </nav>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- HEADER PAGE -->
+        <div class="page-header">
+            <h1>💬 Gestion des Commentaires</h1>
+            <p class="page-subtitle">Modération des commentaires utilisateurs</p>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-container glass">
+            <table class="admin-table">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Auteur</th>
+                        <th>Commentaire</th>
+                        <th>Réponse liée</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for c in comments %}
+                    <tr>
+
+                        <!-- ID -->
+                        <td>#{{ c.id }}</td>
+
+                        <!-- Auteur -->
+                        <td>
+                            <div class="user-info">
+                                <span class="user-avatar">
+                                    {{ c.auteur.username|make_list|first|upper }}
+                                </span>
+                                <span>{{ c.auteur.username }}</span>
+                            </div>
+                        </td>
+
+                        <!-- Contenu -->
+                        <td>
+                            {{ c.contenu|truncatechars:60 }}
+                        </td>
+
+                        <!-- Réponse -->
+                        <td>
+                            {% if c.answer and c.answer.question %}
+                                 <a href="{% url 'question_detail' c.answer.question.id %}">
+                                 Réponse #{{ c.answer.id }}
+                                     </a>
+                            {% else %}
+                                    <span>Question supprimée</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Date -->
+                        <td>
+                            {{ c.date_creation|date:"d/m/Y" }}
+                        </td>
+
+                        <!-- ACTION -->
+                        <td>
+                            <form method="POST" action="{% url 'delete_comment' c.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete"
+                                    onclick="return confirm('Supprimer ce commentaire ?')">
+                                    🗑 Supprimer
+                                </button>
+                            </form>
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            Aucun commentaire trouvé
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+
+    </main>
+</div>
+
+</body>
+</html>

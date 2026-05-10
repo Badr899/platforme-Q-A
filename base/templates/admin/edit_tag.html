@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier Tag - QA Platform</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/gerer-tags.css' %}">
+</head>
+<body>
+    <div class="container">
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">Q</span>
+                <span class="logo-text">A Platform</span>
+                <span class="admin-badge">Admin</span>
+            </div>
+
+            <nav class="nav">
+                <a href="{% url 'manage_tags' %}" class="nav-link">Retour</a>
+                <a href="{% url 'admin_dashboard' %}" class="nav-link">Dashboard</a>
+                <a href="{% url 'logout' %}" class="nav-link logout">Déconnexion</a>
+            </nav>
+        </header>
+
+        <!-- Main -->
+        <main class="main">
+
+            <h1>Modifier le Tag</h1>
+
+            <div class="form-card">
+                <form method="POST" class="tag-form">
+                    {% csrf_token %}
+
+                    <label>Nom du tag</label>
+                    <input type="text" name="nom" value="{{ tag.nom }}" required>
+
+                    <button type="submit">Enregistrer les modifications</button>
+                </form>
+            </div>
+
+        </main>
+
+    </div>
+</body>
+</html>

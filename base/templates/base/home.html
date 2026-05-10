@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Questions — QA Platform</title>
+    <link rel="stylesheet" href="{% static 'css/homeusers.css' %}"/>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+{% if user.is_staff %}
+<div class="admin-banner">
+  <span class="admin-banner-text">⚡ Mode Admin actif</span>
+  <a href="{% url 'admin_dashboard' %}" class="admin-banner-link">Dashboard Admin</a>
+</div>
+{% endif %}
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="{% url 'home' %}" class="logo">
+        <span class="logo-mark">Q</span>
+        <span class="logo-name">A<span> Platform</span></span>
+      </a>
+      <div class="search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <form method="GET" action="{% url 'home' %}" class="search">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"></svg>
+        <input type="text"  name="q"  placeholder="Rechercher un tag ou une question..." value="{{ query|default:'' }}"/>
+        
+        </form>
+      </div>
+    </div>
+    <nav class="nav">
+
+  <a href="{% url 'home' %}" class="nav-a on">Questions</a>
+  <a href="{% url 'answers_list' %}" class="nav-a">Réponses</a>
+
+  {% if user.is_authenticated %}
+
+      {% if user.is_staff %}
+          <!-- 🛡️ ADMIN -->
+          <a href="{% url 'admin_dashboard' %}" class="btn-adm">
+              Dashboard Admin
+          </a>
+
+      {% else %}
+          <!-- 👤 USER NORMAL -->
+          <div class="avatar-wrap">
+          <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+          <span class="uname">{{ user.username }}</span>
+          <a href="{% url 'profile' %}" class="nav-a">Profil</a>
+        </div>
+          <a href="{% url 'create_question' %}" class="btn-post">Poser</a>
+      {% endif %}
+
+      <!-- profil commun -->
+      <a href="{% url 'profile' %}" class="nav-a">Profil</a>
+
+      <a href="{% url 'logout' %}" class="nav-a out">Déconnexion</a>
+
+  {% else %}
+
+      <!-- 🔐 NON CONNECTÉ -->
+      <a href="{% url 'login' %}" class="btn-in">Se connecter</a>
+      <a href="{% url 'register' %}" class="btn-up">S'inscrire</a>
+
+  {% endif %}
+
+</nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="q-section">
+    <div class="q-header">
+      <h1>Toutes les questions</h1>
+      {% if user.is_authenticated  and not user.is_staff %}
+        <a href="{% url 'create_question' %}" class="btn-new">Poser une question</a>
+      {% endif %}
+    </div>
+
+    <div class="q-list">
+  
+      {% for question in questions %}
+      <article class="card">
+        <div class="card-top">
+          
+
+
+          <div class="sep"></div>
+          <div class="st"><span class="st-n">{{ question.answers.count }}</span><span class="st-l">réponses</span></div>
+          <div class="sep"></div>
+          <div class="st"><span class="st-n">{{ question.views|default:0 }}</span><span class="st-l">vues</span></div>
+        </div>
+        <div class="card-body">
+          <a href="{% url 'question_detail' question.id %}" class="card-title">{{ question.titre }}</a>
+          <p class="card-desc">{{ question.description|truncatewords:25 }}</p>
+        </div>
+        <div class="card-foot">
+          <div class="tags">
+            {% for tag in question.tags.all %}
+              <span class="tag">{{ tag.nom }}</span>
+            {% empty %}
+              <span class="tag tag-none">sans tag</span>
+            {% endfor %}
+          </div>
+          <div class="meta">
+            <div class="m-av">{{ question.auteur.username|make_list|first|upper }}</div>
+            <span class="m-name">{{ question.auteur.username }}</span>
+            <span class="m-date">{{ question.date_creation|timesince }}</span>
+          </div>
+          <div class="actions">
+    <a href="{% url 'question_detail' question.id %}" class="btn-reply">
+        Répondre
+    </a>
+  </div>
+        </div>
+      </article>
+      {% empty %}
+      <div class="empty">
+        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <path d="M12 17h.01"/>
+        </svg>
+        <p>Aucune question pour le moment</p>
+        {% if user.is_authenticated  and not user.is_staff %}
+          <a href="{% url 'create_question' %}" class="btn-new">Poser la première question</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+          
+    </div>
+  </section>
+
+  <aside class="sidebar">
+    <div class="s-card">
+      <p class="s-title">Tags populaires</p>
+      <div class="tag-cloud">
+        {% for tag in tags %}
+          <a href="{% url 'tag_detail' tag.id %}" class="tc">{{ tag.nom }}</a>
+        {% empty %}
+          <p class="empty-t">Aucun tag</p>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="s-card">
+      <p class="s-title">Statistiques</p>
+      <div class="stats">
+        <div class="s-box"><span class="s-num">{{ questions.count }}</span><span class="s-desc">Questions</span></div>
+        <div class="s-box"><span class="s-num">{{ tags.count }}</span><span class="s-desc">Tags</span></div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+</body>
+</html>

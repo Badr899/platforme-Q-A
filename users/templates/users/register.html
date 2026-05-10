@@ -1,0 +1,74 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Inscription</title>
+<link rel="stylesheet"  href="{% static 'css/registre.css' %}"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.07L2 22l4.93-1.37A9.96 9.96 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm1 14H9v-2h4v2zm2-4H9V8h6v4z"/></svg>
+    </div>
+    <div class="brand-name">Ask<span>Q&A</span></div>
+  </div>
+
+  <div class="welcome">
+    <h1>Bienvenue ! 👋</h1>
+    <p>Créez votre compte et rejoignez une communauté qui partage et s'entraide.</p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="username">Nom d'utilisateur</label>
+      <div class="input-wrap">
+        <span class="icon">👤</span>
+        <input type="text" id="username" name="username" placeholder="ex: john_doe" required/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Adresse email</label>
+      <div class="input-wrap">
+        <span class="icon">✉️</span>
+        <input type="email" id="email" name="email" placeholder="ex: john@mail.com" required/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password1">Mot de passe</label>
+      <div class="input-wrap">
+        <span class="icon">🔒</span>
+        <input type="password" id="password1" name="password1" placeholder="Minimum 8 caractères" required/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password2">Confirmer le mot de passe</label>
+      <div class="input-wrap">
+        <span class="icon">🔒</span>
+        <input type="password" id="password2" name="password2" placeholder="Répétez votre mot de passe" required/>
+      </div>
+    </div>
+
+    <button type="submit" class="btn">Créer mon compte 🚀</button>
+  </form>
+
+  <p class="footer-text">
+    Déjà un compte ? <a href="{% url 'login' %}">Se connecter</a>
+  </p>
+
+
+</div>
+
+</body>
+</html>

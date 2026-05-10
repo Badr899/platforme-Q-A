@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Utilisateurs — Admin</title>
+
+    <link rel="stylesheet" href="{% static 'css/admine_dash.css' %}">
+    <link rel="stylesheet" href="{% static 'css/manage-users.css' %}">
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- HEADER -->
+<header class="header">
+    <div class="logo">
+        <span class="logo-icon">Q</span>
+        <span class="logo-text">A Platform</span>
+        <span class="admin-badge">Admin</span>
+    </div>
+
+    <nav class="nav">
+        <a href="{% url 'admin_dashboard' %}" class="nav-link">Dashboard</a>
+
+        <a href="{% url 'logout' %}" class="nav-link logout">Logout</a>
+    </nav>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+    
+<div class="page-header">
+    <h1>👥 Gestion des utilisateurs</h1>
+    <p class="page-subtitle">Modération des comptes utilisateurs</p>
+                
+
+</div>
+
+<!-- TABLE -->
+<div class="table-container glass">
+
+<table class="admin-table">
+
+<thead>
+<tr>
+    <th>Utilisateur</th>
+    <th>Email</th>
+    <th>Rôle</th>
+    <th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for u in users %}
+<tr>
+
+    <!-- USER -->
+    <td>
+        <div class="user-info">
+            <div class="user-avatar">
+                {{ u.username|first|upper }}
+            </div>
+            <div>
+                <strong>{{ u.username }}</strong>
+
+                {% if u.is_superuser %}
+                    <small>Super Admin</small>
+                {% elif u.is_staff %}
+                    <small>Staff</small>
+                {% endif %}
+            </div>
+        </div>
+    </td>
+
+    <!-- EMAIL -->
+    <td>{{ u.email|default:"—" }}</td>
+
+    <!-- ROLE -->
+    <td>
+        {% if u.is_superuser %}
+            Admin
+        {% elif u.is_staff %}
+            Staff
+        {% else %}
+            User
+        {% endif %}
+    </td>
+
+    <!-- ACTIONS -->
+    <td>
+
+        {% if not u.is_superuser %}
+
+        <!-- DELETE SECURE FORM (IMPORTANT) -->
+        <form method="POST" action="{% url 'delete_user' u.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-delete"
+                onclick="return confirm('Supprimer {{ u.username }} ?')">
+                Supprimer
+            </button>
+        </form>
+
+        {% else %}
+            <span>Locked</span>
+        {% endif %}
+
+    </td>
+
+</tr>
+
+{% empty %}
+<tr>
+    <td colspan="4" style="text-align:center;">
+        Aucun utilisateur
+    </td>
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+
+</main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poser une question - QA Platform</title>
+    <link rel="stylesheet" href="{% static 'css/poser-question.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="{% url 'home' %}" class="logo">
+                    <span class="logo-icon">Q</span>
+                    <span class="logo-text">A Platform</span>
+                </a>
+                
+            </div>
+            <nav class="header-nav">
+                <a href="{% url 'home' %}" class="nav-link">Questions</a>
+                <a href="{% url 'create_question' %}" class="nav-link active">Poser</a>
+                <button class="notification-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                    </svg>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="user-menu">
+                    <div class="user-avatar">{{ user.username|make_list|first|upper }}</div>
+                    <span class="user-name">{{ user.username }}</span>
+                </div>
+                <a href="{% url 'logout' %}" class="nav-link logout">Deconnexion</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="form-section">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Poser une question</h1>
+                <p class="page-subtitle">Posez une question claire et detaillee pour obtenir les meilleures reponses de la communaute.</p>
+            </div>
+
+                 {% if form.errors %}
+                    <div class="error-box">
+                         {{ form.errors }}
+                       </div>
+                 {% endif %}
+
+            <!-- Question Form -->
+            <form class="question-form" method="POST">
+                {% csrf_token %}
+                
+                <!-- Title Field -->
+                <div class="form-group">
+                    <label for="titre" class="form-label">
+                        Titre
+                        <span class="required">*</span>
+                    </label>
+                    <p class="form-hint">Soyez specifique et imaginez que vous posez la question a une autre personne.</p>
+                    <input 
+                        type="text" 
+                        id="titre" 
+                        value="{{ form.titre.value|default:'' }}"
+                        name="titre" 
+                        class="form-input" 
+                        placeholder="Ex: Comment implementer l'authentification JWT dans Django ?"
+                        required
+                    >
+                </div>
+
+                <!-- Description Field -->
+                <div class="form-group">
+                    <label for="description" class="form-label">
+                        Description
+                        <span class="required">*</span>
+                    </label>
+                    <p class="form-hint">Incluez toutes les informations necessaires pour que quelqu'un puisse repondre a votre question.</p>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        class="form-textarea" 
+                        placeholder="Decrivez votre probleme en detail. Incluez le code, les messages d'erreur, et ce que vous avez deja essaye..."
+                        rows="10"
+                        required
+                    >{{ form.description.value|default:'' }}</textarea>
+                </div>
+
+                <!-- Tags Field -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Tags
+                        <span class="optional">(optionnel)</span>
+                    </label>
+                    <p class="form-hint">Selectionnez des tags existants pour votre question.</p>
+                    <div class="tags-container">
+                        {% for tag in tags %}
+                            <label class="tag-checkbox">
+                                <input type="checkbox" name="tags"  value="{{ tag.id }}" {% if tag in form.tags.value %}checked{% endif %}>
+                                <span class="tag-label">{{ tag.nom }}</span>
+                            </label>
+                        {% empty %}
+                            <p class="no-tags">Aucun tag disponible</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="{% url 'home' %}" class="btn-cancel">Annuler</a>
+                    <button type="submit" class="btn-submit">Publier la question</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar Tips -->
+        <aside class="sidebar">
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">Conseils pour une bonne question</h3>
+                <ul class="tips-list">
+                    <li><span class="tip-number">1</span> Resumez votre probleme en une phrase</li>
+                    <li><span class="tip-number">2</span> Decrivez ce que vous avez deja essaye</li>
+                    <li><span class="tip-number">3</span> Incluez le code pertinent si necessaire</li>
+                    <li><span class="tip-number">4</span> Montrez les messages d'erreur exacts</li>
+                    <li><span class="tip-number">5</span> Relisez votre question avant de publier</li>
+                </ul>
+            </div>
+
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">Formatage</h3>
+                <p class="format-intro">Utilisez Markdown pour formater:</p>
+                <div class="format-examples">
+                    <code>**gras**</code>
+                    <code>*italique*</code>
+                    <code>`code`</code>
+                </div>
+            </div>
+        </aside>
+    </main>
+</body>
+</html>

@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mes Réponses — QA Platform</title>
+  <link rel="stylesheet" href="{% static 'css/answers-list.css' %}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+{% if user.is_staff %}
+<div class="admin-banner">
+  <span class="admin-banner-text">⚡ Mode Admin actif</span>
+  <a href="{% url 'admin_dashboard' %}" class="admin-banner-link">Dashboard Admin</a>
+</div>
+{% endif %}
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="{% url 'home' %}" class="logo">
+        <span class="logo-mark">Q</span>
+        <span class="logo-name">A<span> Platform</span></span>
+      </a>
+      
+    </div>
+    <nav class="nav">
+      <a href="{% url 'home' %}" class="nav-a">Questions</a>
+      <a href="{% url 'answers_list' %}" class="nav-a on">Réponses</a>
+      {% if user.is_authenticated and not user.is_staff %}
+        <a href="{% url 'create_question' %}" class="btn-post">Poser</a>
+        <div class="avatar-wrap">
+          <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+          <span class="uname">{{ user.username }}</span>
+          <a href="{% url 'profile' %}" class="nav-a">Profil</a>
+        </div>
+        {% if user.is_staff %}
+          <a href="{% url 'admin_dashboard' %}" class="btn-adm">Admin</a>
+        {% endif %}
+        <a href="{% url 'logout' %}" class="nav-a out">Déconnexion</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn-in">Se connecter</a>
+        <a href="{% url 'register' %}" class="btn-up">S'inscrire</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="q-section">
+    <div class="q-header">
+      <div>
+        <h1>💬 Mes Réponses</h1>
+        <p class="card-desc">{{ answers.count }} réponse{{ answers.count|pluralize:"s" }} publiée{{ answers.count|pluralize:"s" }}</p>
+      </div>
+      <a href="{% url 'home' %}" class="btn-new">← Retour aux questions</a>
+    </div>
+
+    <div class="answers-list">
+      {% for answer in answers %}
+      <article class="answer-card {% if answer.est_acceptee %}accepted{% endif %}">
+        
+        {% if answer.est_acceptee %}
+        <span class="accepted-badge">✔ Acceptée</span>
+        {% endif %}
+
+        <div class="answer-layout">
+          <!-- VOTES -->
+          <div class="answer-votes">
+            <span class="vote-number">{{ answer.score|default:0 }}</span>
+            <span class="vote-label">votes</span>
+          </div>
+
+          <!-- CONTENT -->
+          <div class="answer-content">
+            <h3 class="answer-question-title">
+              <a href="{% url 'question_detail' answer.question.id %}">
+                {{ answer.question.titre }}
+              </a>
+            </h3>
+
+            <p class="answer-text">{{ answer.contenu|truncatewords:30 }}</p>
+
+            <!-- META -->
+            <div class="answer-meta">
+              <div class="author-mini">
+                <span class="author-avatar">{{ answer.auteur.username|make_list|first|upper }}</span>
+                <div class="author-info">
+                  <span class="author-name">{{ answer.auteur.username }}</span>
+                  <span class="answer-date">{{ answer.date_creation|timesince }} ago</span>
+                </div>
+              </div>
+              <a href="{% url 'question_detail' answer.question.id %}" class="btn-view">Voir le contexte →</a>
+            </div>
+
+            <!-- COMMENTS -->
+            <div class="comments-section">
+              <button type="button" class="btn-comment-toggle" onclick="toggleComments(this)">
+                💬 Commenter ({{ answer.comments.count }})
+              </button>
+
+              <div class="comments-box" style="display: none;">
+                {% for comment in answer.comments.all %}
+                <div class="comment">
+                  <div class="comment-header">
+                    <span class="comment-author">{{ comment.auteur.username }}</span>
+                    <span class="comment-date">{{ comment.date_creation|timesince }}</span>
+                  </div>
+                  <p class="comment-text">{{ comment.contenu }}</p>
+                </div>
+                {% empty %}
+                <p class="no-comment">Aucun commentaire pour le moment</p>
+                {% endfor %}
+
+                <form method="POST" action="{% url 'add_comment_answer' answer.id %}" class="comment-form">
+                  {% csrf_token %}
+                  <input type="text" name="contenu" placeholder="Ajouter un commentaire..." required autocomplete="off">
+                  <button type="submit">Envoyer</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+      {% empty %}
+      <div class="empty">
+        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p>Aucune réponse publiée</p>
+        <a href="{% url 'home' %}" class="btn-new">Explorer les questions</a>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination (si activée dans la vue) -->
+    {% if answers.has_other_pages %}
+    <div class="pagination">
+      {% if answers.has_previous %}
+        <a href="?page=1" class="pagination-link">« Première</a>
+        <a href="?page={{ answers.previous_page_number }}" class="pagination-link">← Précédente</a>
+      {% endif %}
+      <span class="pagination-info">Page {{ answers.number }} sur {{ answers.paginator.num_pages }}</span>
+      {% if answers.has_next %}
+        <a href="?page={{ answers.next_page_number }}" class="pagination-link">Suivante →</a>
+        <a href="?page={{ answers.paginator.num_pages }}" class="pagination-link">Dernière »</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    
+    <div class="s-card">
+      <p class="s-title">💡 Conseil</p>
+      <p class="card-desc" style="font-size: 0.9rem;">
+        Les réponses avec des exemples concrets ou du code formaté sont plus souvent validées ✅
+      </p>
+    </div>
+  </aside>
+</main>
+
+<footer class="footer">
+  <p>© 2024 QA Platform — Tous droits réservés</p>
+</footer>
+
+<script>
+  function toggleComments(btn) {
+    const box = btn.nextElementSibling;
+    const isVisible = box.style.display === 'block';
+    box.style.display = isVisible ? 'none' : 'block';
+    btn.textContent = isVisible ? 
+      btn.textContent.replace('Masquer', 'Commenter') : 
+      btn.textContent.replace('Commenter', 'Masquer');
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ question.titre }} — QA Platform</title>
+  <link rel="stylesheet" href="{% static 'css/detail-question.css' %}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+
+<body>
+
+<!-- ===== BACKGROUND DECORATIF ===== -->
+<div class="bg-decoration">
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+  <div class="grid-pattern"></div>
+</div>
+
+<!-- ===== HEADER FLOTTANT ===== -->
+<header class="header-float">
+  <div class="header-inner">
+    <a href="{% url 'home' %}" class="nav-back">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      <span>Retour</span>
+    </a>
+    
+    <div class="header-center">
+      <span class="breadcrumb">Question</span>
+    </div>
+    
+    {% if user.is_authenticated %}
+    <div class="user-mini">
+
+      <span class="user-avatar">{{ user.username|first|upper }}</span>
+    </div>
+    {% endif %}
+  </div>
+</header>
+
+<!-- ===== CONTENU PRINCIPAL ===== -->
+<main class="conversation-wrap">
+
+  <!-- ===== HERO QUESTION ===== -->
+  <section class="question-hero">
+    <div class="question-hero-inner">
+      
+      <div class="question-header">
+        <div class="question-author">
+          <span class="author-avatar-lg">{{ question.auteur.username|first|upper }}</span>
+          <div class="author-details">
+            <span class="author-name">{{ question.auteur.username }}</span>
+            <time class="author-time" datetime="{{ question.date_creation|date:'c' }}">
+              {{ question.date_creation|timesince }} ago
+            </time>
+          </div>
+        </div>
+        <span class="question-id">#{{ question.id }}</span>
+      </div>
+
+      <h1 class="question-headline">{{ question.titre }}</h1>
+
+      <div class="question-description">
+        {{ question.description|linebreaks }}
+      </div>
+
+      <!-- Tags -->
+      {% if question.tags.all %}
+      <div class="question-tags">
+        {% for tag in question.tags.all %}
+          <span class="tag-pill">{{ tag.nom }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Stats rapides -->
+      <div class="question-stats">
+        <div class="stat">
+          <span class="stat-value">{{ question.answers.count }}</span>
+          <span class="stat-label">réponses</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-value">{{ question.answers.all|length }}</span>
+          <span class="stat-label">votes</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== TIMELINE DES RÉPONSES ===== -->
+  <section class="answers-timeline">
+    
+    <div class="timeline-header">
+      <h2>Réponses</h2>
+      <span class="answers-count">{{ question.answers.count }}</span>
+    </div>
+
+    <div class="timeline-track">
+      
+      {% for answer in answers %}
+
+<article class="timeline-item {% if answer.est_acceptee %}is-accepted{% endif %}" id="answer-{{ answer.id }}">
+
+  <div class="timeline-content">
+
+    <!-- HEADER -->
+    <header class="answer-header">
+      <strong>{{ answer.auteur.username }}</strong>
+      <span>{{ answer.date_creation|timesince }} ago</span>
+
+      {% if answer.est_acceptee %}
+        <span class="accepted-chip">✔ Acceptée</span>
+      {% endif %}
+    </header>
+
+    <!-- CONTENT -->
+    <div class="answer-text">
+      {{ answer.contenu|linebreaks }}
+    </div>
+
+    <!-- VOTES -->
+    <footer class="answer-footer">
+
+      {% if user.is_authenticated %}
+
+        <div class="vote-group">
+
+          <!-- UP -->
+          <form method="POST" action="{% url 'vote_answer' answer.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="type_vote" value="up">
+            <button type="submit">
+              👍 {{ answer.upvotes }}
+            </button>
+          </form>
+
+          <!-- DOWN -->
+          <form method="POST" action="{% url 'vote_answer' answer.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="type_vote" value="down">
+            <button type="submit">
+              👎 {{ answer.downvotes }}
+            </button>
+          </form>
+
+        </div>
+
+      {% else %}
+        <p>🔒 Connectez-vous pour voter</p>
+      {% endif %}
+
+      <!-- ACCEPT ANSWER -->
+      {% if user.is_authenticated and request.user == question.auteur and not answer.est_acceptee %}
+        <form method="POST" action="{% url 'accept_answer' answer.id %}">
+          {% csrf_token %}
+          <button type="submit">
+            ✔ Marquer comme solution
+          </button>
+        </form>
+      {% endif %}
+
+      <!-- COMMENTS -->
+      <div class="comments-section">
+
+        {% if user.is_authenticated %}
+
+          <button type="button" onclick="toggleComments(this)">
+            💬 Commentaires ({{ answer.comments.count }})
+          </button>
+
+          <div class="comments-box" style="display:none;">
+
+            {% for comment in answer.comments.all %}
+              <div class="comment">
+                <strong>{{ comment.auteur.username }}</strong>
+                <p>{{ comment.contenu }}</p>
+              </div>
+            {% empty %}
+              <p>Aucun commentaire</p>
+            {% endfor %}
+
+            <form method="POST" action="{% url 'add_comment_answer' answer.id %}">
+              {% csrf_token %}
+              <input type="text" name="contenu" placeholder="Ajouter un commentaire..." required>
+              <button type="submit">Envoyer</button>
+            </form>
+
+          </div>
+
+        {% else %}
+          <p>🔒 Connectez-vous pour commenter</p>
+        {% endif %}
+
+      </div>
+
+    </footer>
+
+  </div>
+
+</article>
+
+{% empty %}
+ 
+      <!-- État vide -->
+      <div class="timeline-empty">
+        <div class="empty-illustration">💬</div>
+        <p>Aucune réponse pour le moment</p>
+        <span class="empty-hint">Soyez le premier à répondre !</span>
+      </div>
+      
+      {% endfor %}
+
+    </div>
+  </section>
+
+  <!-- ===== ZONE DE RÉPONSE FLOTTANTE ===== -->
+  {% if user.is_authenticated %}
+  <aside class="reply-fab-container">
+    <div class="reply-fab-card">
+      <form method="POST" action="{% url 'create_answer' question.id %}" class="reply-form-compact">
+        {% csrf_token %}
+        <div class="reply-input-wrap">
+          <textarea 
+            name="contenu" 
+            rows="3" 
+            placeholder="Écrivez votre réponse..." 
+            required
+            class="reply-input"
+          ></textarea>
+          <button type="submit" class="btn-send-reply">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+            Répondre
+          </button>
+        </div>
+      </form>
+    </div>
+  </aside>
+  {% else %}
+  <aside class="reply-fab-container">
+    <div class="reply-fab-card auth-prompt">
+      <p>🔐 <a href="{% url 'login' %}?next={{ request.path }}">Connectez-vous</a> pour participer</p>
+    </div>
+  </aside>
+  {% endif %}
+
+</main>
+
+<!-- ===== SCRIPTS ===== -->
+<script>
+// Auto-expand textarea
+const replyInput = document.querySelector('.reply-input');
+if (replyInput) {
+  replyInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+}
+
+// Smooth scroll pour les ancres
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelector(this.getAttribute('href'))?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+  });
+});
+
+// Animation d'apparition au scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.timeline-item').forEach(item => {
+  observer.observe(item);
+});
+
+
+  function toggleComments(btn) {
+    const box = btn.nextElementSibling;
+    const isVisible = box.style.display === 'block';
+    box.style.display = isVisible ? 'none' : 'block';
+    btn.textContent = isVisible ? 
+      btn.textContent.replace('Masquer', 'Commenter') : 
+      btn.textContent.replace('Commenter', 'Masquer');
+  }
+
+</script>
+
+</body>
+</html>

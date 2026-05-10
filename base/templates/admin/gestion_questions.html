@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Questions — QA Platform Admin</title>
+    <link rel="stylesheet" href="{% static 'css/admine_dash.css' %}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">Q</span>
+            <span class="logo-text">A Platform</span>
+            <span class="admin-badge">Admin</span>
+        </div>
+        <nav class="nav">
+            <a href="{% url 'admin_dashboard' %}" class="nav-link">Dashboard</a>
+            <a href="{% url 'logout' %}" class="nav-link logout">Logout</a>
+        </nav>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1>🗂 Gestion des Questions</h1>
+                <p class="page-subtitle">Modérez, éditez ou supprimez les questions de la plateforme</p>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container glass">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Auteur</th>
+                        <th>Tags</th>
+                        <th>Stats</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for q in questions %}
+                    <tr>
+                        <!-- Question Title & Description -->
+                        <td>
+                            <div class="question-cell">
+                                <a href="{% url 'question_detail' q.id %}" class="question-title">
+                                    {{ q.titre }}
+                                </a>
+                                <p class="question-desc">
+                                    {{ q.description|truncatewords:15 }}
+                                </p>
+                            </div>
+                        </td>
+
+                        <!-- Author -->
+                        <td>
+                            <div class="author-cell">
+                                <span class="author-avatar">{{ q.auteur.username|make_list|first|upper }}</span>
+                                <span class="author-name">{{ q.auteur.username }}</span>
+                            </div>
+                        </td>
+
+                        <!-- Tags -->
+                        <td>
+                            <div class="tags-cell">
+                                {% for tag in q.tags.all|slice:":2" %}
+                                    <span class="tag">{{ tag.nom }}</span>
+                                {% empty %}
+                                    <span class="tag tag-none">—</span>
+                                {% endfor %}
+                                {% if q.tags.count > 2 %}
+                                    <span class="tag tag-more">+{{ q.tags.count|add:"-2" }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Stats -->
+                        <td>
+                            <div class="stats-cell">
+                                <span class="stat-item" title="Réponses">
+                                    <span class="stat-icon">💬</span>
+                                    <span class="stat-value">{{ q.answers.count }}</span>
+                                </span>
+                                <span class="stat-item" title="Vues">
+                                    <span class="stat-icon">👁</span>
+                                    <span class="stat-value">{{ q.views|default:0 }}</span>
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Date -->
+                        <td>
+                            <span class="date-cell">
+                                {{ q.date_creation|date:"d/m/y" }}
+                                <small class="date-ago">{{ q.date_creation|timesince }}</small>
+                            </span>
+                        </td>
+
+                       
+
+                        <!-- Actions -->
+                        <td>
+                            <div class="actions-cell">
+                                
+                                <a href="{% url 'question_detail' q.id %}" class="btn-action btn-view" title="Voir">
+                                    👁
+                                </a>
+                                <form method="POST" action="{% url 'delete_question' q.id %}" class="action-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-action btn-delete" title="Supprimer"
+                                            onclick="return confirm('Supprimer « {{ q.titre|escapejs }} » ?')">
+                                        🗑
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            Aucune question trouvée
+                        </td>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if questions.has_other_pages %}
+        <div class="pagination">
+            {% if questions.has_previous %}
+                <a href="?page=1" class="pagination-link">« Première</a>
+                <a href="?page={{ questions.previous_page_number }}" class="pagination-link">← Précédente</a>
+            {% endif %}
+            <span class="pagination-info">Page {{ questions.number }} sur {{ questions.paginator.num_pages }}</span>
+            {% if questions.has_next %}
+                <a href="?page={{ questions.next_page_number }}" class="pagination-link">Suivante →</a>
+                <a href="?page={{ questions.paginator.num_pages }}" class="pagination-link">Dernière »</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </main>
+</div>
+
+</body>
+</html>

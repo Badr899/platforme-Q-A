@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerer les Tags - QA Platform</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/gerer-tags.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">Q</span>
+                <span class="logo-text">A Platform</span>
+                <span class="admin-badge">Admin</span>
+            </div>
+            <nav class="nav">
+                <a href="{% url 'admin_dashboard' %}" class="nav-link">Dashboard</a>
+                <a href="{% url 'logout' %}" class="nav-link logout">Deconnexion</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <h1>Gestion des Tags</h1>
+
+            <!-- Formulaire ajout -->
+            <div class="form-card">
+                <h2>Ajouter un nouveau tag</h2>
+                <form method="POST" class="tag-form">
+                    {% csrf_token %}
+                    <input type="text" name="nom" value="{{ form.nom.value|default:'' }}" placeholder="Nom du tag" required>
+                    <button type="submit">Ajouter</button>
+                </form>
+            </div>
+
+               {% if form.errors %}
+                    <div class="error-box">
+                 {{ form.errors }}
+                    </div>
+               {% endif %}
+
+            <!-- Liste des tags -->
+            <div class="tags-card">
+                <h2>Tags existants</h2>
+                <div class="tags-list">
+                    {% for tag in tags %}
+                        <div class="tag-item">
+                            <span class="tag-name">{{ tag.nom }}</span>
+                            <div class="tag-actions">
+                                <a href="{% url 'update_tag' tag.id %}" class="btn-edit">Modifier</a>
+                                <form method="POST" action="{% url 'delete_tag' tag.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                     <button type="submit" class="btn-delete">
+                                                 Supprimer
+                                               </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="empty-message">Aucun tag pour le moment.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

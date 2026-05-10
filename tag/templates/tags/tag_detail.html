@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tag « {{ tag.nom }} » — QA Platform</title>
+  <link rel="stylesheet" href="{% static 'css/homeusers.css' %}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+{% if user.is_staff %}
+<div class="admin-banner">
+  <span class="admin-banner-text">⚡ Mode Admin actif</span>
+  <a href="{% url 'admin_dashboard' %}" class="admin-banner-link">Dashboard Admin</a>
+</div>
+{% endif %}
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="{% url 'home' %}" class="logo">
+        <span class="logo-mark">Q</span>
+        <span class="logo-name">A<span> Platform</span></span>
+      </a>
+  
+    </div>
+    <nav class="nav">
+      <a href="{% url 'home' %}" class="nav-a">Questions</a>
+      <a href="{% url 'answers_list' %}" class="nav-a">Réponses</a>
+      <a href="#" class="nav-a on">Tags</a>
+      {% if user.is_authenticated  and not user.is_staff %}
+        <a href="{% url 'create_question' %}" class="btn-post">Poser</a>
+        <button class="notif">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+          <span class="badge">3</span>
+        </button>
+        <div class="avatar-wrap">
+          <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+          <span class="uname">{{ user.username }}</span>
+          <a href="{% url 'profile' %}" class="nav-a">Profil</a>
+        </div>
+        {% if user.is_staff %}
+          <a href="{% url 'admin_dashboard' %}" class="btn-adm">Admin</a>
+        {% endif %}
+        <a href="{% url 'logout' %}" class="nav-a out">Déconnexion</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn-in">Se connecter</a>
+        <a href="{% url 'register' %}" class="btn-up">S'inscrire</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="q-section">
+    <div class="q-header">
+      <div>
+        <span class="tag tag-highlight">#{{ tag.nom }}</span>
+        <h1 style="margin-top: 12px;">Questions avec ce tag</h1>
+        <p class="card-desc" style="margin-top: 4px;">{{ questions.count }} question{{ questions.count|pluralize:"s" }} trouvée{{ questions.count|pluralize:"s" }}</p>
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{% url 'home' %}" class="btn-new">← Toutes les questions</a>
+        {% if user.is_authenticated  and not user.is_staff %}
+          <a href="{% url 'create_question' %}?tag={{ tag.id }}" class="btn-reply">Poser une question avec ce tag</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="q-list">
+      {% for question in questions %}
+      <article class="card">
+        <div class="card-top">
+          <div class="sep"></div>
+          <div class="st"><span class="st-n">{{ question.answers.count }}</span><span class="st-l">réponses</span></div>
+          <div class="sep"></div>
+          <div class="st"><span class="st-n">{{ question.views|default:0 }}</span><span class="st-l">vues</span></div>
+        </div>
+        <div class="card-body">
+          <a href="{% url 'question_detail' question.id %}" class="card-title">{{ question.titre }}</a>
+          <p class="card-desc">{{ question.description|truncatewords:25 }}</p>
+        </div>
+        <div class="card-foot">
+          <div class="tags">
+            {% for t in question.tags.all %}
+              <a href="{% url 'tag_detail' t.id %}" class="tag">{{ t.nom }}</a>
+            {% empty %}
+              <span class="tag tag-none">sans tag</span>
+            {% endfor %}
+          </div>
+          <div class="meta">
+            <div class="m-av">{{ question.auteur.username|make_list|first|upper }}</div>
+            <span class="m-name">{{ question.auteur.username }}</span>
+            <span class="m-date">{{ question.date_creation|timesince }}</span>
+          </div>
+          <div class="actions">
+            <a href="{% url 'question_detail' question.id %}" class="btn-reply">Répondre</a>
+          </div>
+        </div>
+      </article>
+      {% empty %}
+      <div class="empty">
+        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <path d="M12 17h.01"/>
+        </svg>
+        <p>Aucune question pour le tag <strong>#{{ tag.nom }}</strong></p>
+        {% if user.is_authenticated  and not user.is_staff %}
+          <a href="{% url 'create_question' %}?tag={{ tag.id }}" class="btn-new">Poser la première question</a>
+        
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination (optionnelle) -->
+    {% if questions.has_other_pages %}
+    <div class="pagination">
+      {% if questions.has_previous %}
+        <a href="?page=1" class="pagination-link">« Première</a>
+        <a href="?page={{ questions.previous_page_number }}" class="pagination-link">← Précédente</a>
+      {% endif %}
+      
+      <span class="pagination-info">Page {{ questions.number }} sur {{ questions.paginator.num_pages }}</span>
+      
+      {% if questions.has_next %}
+        <a href="?page={{ questions.next_page_number }}" class="pagination-link">Suivante →</a>
+        <a href="?page={{ questions.paginator.num_pages }}" class="pagination-link">Dernière »</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  </section>
+
+  <aside class="sidebar">
+    <!-- Tag actuel en évidence -->
+    <div class="s-card">
+      <p class="s-title">Tag sélectionné</p>
+      <div style="text-align: center; padding: 10px;">
+        <span class="tag tag-highlight" style="font-size: 1.1rem;">#{{ tag.nom }}</span>
+        <p class="card-desc" style="margin-top: 10px;">
+          {{ tag.description|default:"Aucune description pour ce tag."|truncatewords:15 }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Statistiques du tag -->
+    <div class="s-card">
+      <p class="s-title">Statistiques</p>
+      <div class="stats">
+        <div class="s-box"><span class="s-num">{{ questions.count }}</span><span class="s-desc">Questions</span></div>
+        <div class="s-box"><span class="s-num">{{ tag.question_set.count|default:questions.count }}</span><span class="s-desc">Total</span></div>
+      </div>
+    </div>
+
+    <!-- Conseil -->
+    <div class="s-card">
+      <p class="s-title">💡 Le saviez-vous ?</p>
+      <p class="card-desc" style="font-size: 0.9rem;">
+        Vous pouvez combiner plusieurs tags dans la recherche avancée pour affiner vos résultats.
+      </p>
+      <a href="{% url 'home' %}" class="nav-a" style="font-size: 0.9rem;">Essayer la recherche →</a>
+    </div>
+  </aside>
+</main>
+
+<footer class="footer">
+  <p>© 2024 QA Platform — Tous droits réservés</p>
+</footer>
+
+</body>
+</html>

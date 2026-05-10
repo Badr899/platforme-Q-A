@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Réponses — QA Platform Admin</title>
+    <link rel="stylesheet" href="{% static 'css/admine_dash.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">Q</span>
+            <span class="logo-text">A Platform</span>
+            <span class="admin-badge">Admin</span>
+        </div>
+        <nav class="nav">
+            <a href="{% url 'admin_dashboard' %}" class="nav-link">Dashboard</a>
+            <a href="{% url 'logout' %}" class="nav-link logout">Logout</a>
+        </nav>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1>💬 Gestion des Réponses & Commentaires</h1>
+                <p class="page-subtitle">Modérez indépendamment les réponses et les commentaires</p>
+            </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- TABLEAU 1 : RÉPONSES -->
+        <!-- ===================================================== -->
+        <h2>📌 Réponses</h2>
+
+        <div class="table-container glass">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Auteur</th>
+                        <th>Réponse</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in answers %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'question_detail' a.question.id %}" class="question-link">
+                                #{{ a.question.id }}
+                            </a>
+                        </td>
+                        <td>{{ a.auteur.username }}</td>
+                        <td>{{ a.contenu|truncatechars:80 }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'delete_answer' a.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete"
+                                    onclick="return confirm('Supprimer cette réponse ?')">
+                                    🗑 Supprimer
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-row">Aucune réponse</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    
+
+        <!-- Pagination (pour les réponses) -->
+        {% if answers.has_other_pages %}
+        <div class="pagination">
+            {% if answers.has_previous %}
+                <a href="?page=1" class="pagination-link">« Première</a>
+                <a href="?page={{ answers.previous_page_number }}" class="pagination-link">← Précédente</a>
+            {% endif %}
+            <span class="pagination-info">Page {{ answers.number }} sur {{ answers.paginator.num_pages }}</span>
+            {% if answers.has_next %}
+                <a href="?page={{ answers.next_page_number }}" class="pagination-link">Suivante →</a>
+                <a href="?page={{ answers.paginator.num_pages }}" class="pagination-link">Dernière »</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </main>
+</div>
+
+</body>
+</html>

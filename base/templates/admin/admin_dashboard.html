@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - QA Platform</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/admine_dash.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">Q</span>
+                <span class="logo-text">A Platform</span>
+                <span class="admin-badge">Admin</span>
+            </div>
+            <nav class="nav">
+                <a href="{% url 'home' %}" class="nav-link">Voir le site</a>
+                <a href="{% url 'logout' %}" class="nav-link logout">Deconnexion</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <h1>Dashboard Admin</h1>
+            <p class="welcome">Bienvenue, <strong>{{ user.username }}</strong></p>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-value">{{ question_count }}</span>
+                    <span class="stat-label">Questions</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ answer_count }}</span>
+                    <span class="stat-label">Reponses</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ user_count }}</span>
+                    <span class="stat-label">Utilisateurs</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ tag_count }}</span>
+                    <span class="stat-label">Tags</span>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="quick-links">
+                <h2>Actions rapides</h2>
+                <div class="links-grid">
+                    <a href="{% url 'manage_users' %}" class="link-card">Gerer les utilisateurs</a>
+                    <a href="{% url 'manage_tags' %}" class="link-card">Gerer les tags</a>
+                    <a href="{% url 'manage_questions' %}" class="link-card">Gerer les questions</a>
+                    <a href="{% url 'manage_answers' %}" class="link-card">Gerer les reponses </a>
+                    <a href="{% url 'manage_comments' %}" class="link-card">Gerer les commentaires</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

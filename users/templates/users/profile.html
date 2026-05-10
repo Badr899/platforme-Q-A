@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mon Profil — QA Platform</title>
+  <link rel="stylesheet" href="{% static 'css/homeprofil.css' %}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+{% if user.is_staff %}
+<div class="admin-banner">
+  <span class="admin-banner-text">⚡ Mode Admin actif</span>
+  <a href="{% url 'admin_dashboard' %}" class="admin-banner-link">Dashboard Admin</a>
+</div>
+{% endif %}
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="{% url 'home' %}" class="logo">
+        <span class="logo-mark">Q</span>
+        <span class="logo-name">A<span> Platform</span></span>
+      </a>
+    </div>
+    <nav class="nav">
+      <a href="{% url 'home' %}" class="nav-a">Questions</a>
+      <a href="{% url 'answers_list' %}" class="nav-a">Réponses</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'create_question' %}" class="btn-post">Poser</a>
+        
+        <div class="avatar-wrap">
+          <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+          <span class="uname">{{ user.username }}</span>
+          <a href="{% url 'profile' %}" class="nav-a on">Profil</a>
+        </div>
+        {% if user.is_staff %}
+          <a href="{% url 'admin_dashboard' %}" class="btn-adm">Admin</a>
+        {% endif %}
+        <a href="{% url 'logout' %}" class="nav-a out">Déconnexion</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn-in">Se connecter</a>
+        <a href="{% url 'register' %}" class="btn-up">S'inscrire</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="q-section">
+    <div class="q-header">
+      <h1>👤 Profil de {{ user.username }}</h1>
+      <a href="{% url 'home' %}" class="btn-new">← Retour</a>
+    </div>
+
+    <!-- 📌 Mes Questions -->
+    <div class="card profile-card">
+      <div class="card-body">
+        <h2 class="card-title">📌 Mes Questions</h2>
+        <div class="q-list">
+          {% for q in questions %}
+          <article class="card card-sm">
+            <div class="card-body">
+              <a href="{% url 'question_detail' q.id %}" class="card-title">{{ q.titre }}</a>
+              <p class="card-desc">{{ q.description|truncatewords:20|default:"Aucune description" }}</p>
+            </div>
+            <div class="card-foot">
+              <div class="meta">
+                <span class="m-date">{{ q.date_creation|timesince }} ago</span>
+                <span class="st"><span class="st-n">{{ q.answers.count }}</span> réponses</span>
+              </div>
+              <a href="{% url 'question_detail' q.id %}" class="btn-reply">Voir</a>
+              {% if user == q.auteur %}
+               <form method="POST" action="{% url 'delete_own_question' q.id %}" style="display:inline;">
+                   {% csrf_token %}
+                        <button type="submit" class="btn-delete">
+                                  Supprimer
+                             </button>
+               </form>
+              {% endif %}
+            </div>
+          </article>
+          {% empty %}
+          <div class="empty">
+            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <path d="M12 17h.01"/>
+            </svg>
+            <p>Aucune question posée</p>
+            <a href="{% url 'create_question' %}" class="btn-new">Poser ma première question</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 💬 Mes Réponses -->
+    <div class="card profile-card">
+      <div class="card-body">
+        <h2 class="card-title">💬 Mes Réponses</h2>
+        <div class="q-list">
+          {% for a in answers %}
+          <article class="card card-sm">
+            <div class="card-body">
+              <p class="card-desc">{{ a.contenu|truncatewords:25 }}</p>
+            </div>
+            <div class="card-foot">
+              <div class="meta">
+                <span class="m-date">{{ a.date_creation|timesince }} ago</span>
+                <span class="tag">Réponse</span>
+              </div>
+              <a href="{% url 'question_detail' a.question.id %}" class="btn-reply">Voir la question →</a>
+            </div>
+          </article>
+          {% empty %}
+          <div class="empty">
+            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <p>Aucune réponse donnée</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 👍 Mes Votes -->
+    <div class="card profile-card">
+      <div class="card-body">
+        <h2 class="card-title">👍 Mes Votes</h2>
+        <div class="stats">
+          <div class="s-box">
+            <span class="s-num">{{ upvotes }}</span>
+            <span class="s-desc">Votes positifs</span>
+          </div>
+          <div class="s-box">
+            <span class="s-num">{{ downvotes }}</span>
+            <span class="s-desc">Votes négatifs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Sidebar Profil -->
+  <aside class="sidebar">
+    <div class="s-card">
+      <div class="meta" style="flex-direction: column; align-items: center; text-align: center;">
+        <div class="m-av" style="width: 60px; height: 60px; font-size: 24px;">
+          {{ user.username|make_list|first|upper }}
+        </div>
+        <span class="m-name" style="font-size: 1.2rem; margin-top: 10px;">{{ user.username }}</span>
+      </div>
+    </div>
+
+    <div class="s-card">
+      <p class="s-title">Actions</p>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <a href="{% url 'create_question' %}" class="btn-new" style="width: 100%; text-align: center;">➕ Nouvelle question</a>
+        <a href="{% url 'logout' %}" class="nav-a out" style="width: 100%; text-align: center;">Déconnexion</a>
+      </div>
+    </div>
+
+    <div class="s-card">
+      <p class="s-title">Statistiques</p>
+      <div class="stats">
+
+        <div class="s-box"><span class="s-num">{{ questions.count }}</span><span class="s-desc">Questions</span></div>
+        <div class="s-box"><span class="s-num">{{ answers.count }}</span><span class="s-desc">Réponses</span></div>
+        <div class="s-box"><span class="s-num">{{ votes_count }}</span><span class="s-desc">Votes</span></div>
+        <div class="s-box"><span class="s-num">{{ reputation }}</span><span class="s-desc">Réputation</span></div>
+
+      </div>
+    </div>
+  </aside>
+</main>
+
+</body>
+</html>
