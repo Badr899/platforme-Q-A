@@ -427,6 +427,51 @@ svg { display: block; flex-shrink: 0; }
     letter-spacing: 0.3px;
 }
 
+/* ===== Delete Button (within answer-meta) ===== */
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.35rem 0.75rem;
+    background: rgba(239, 68, 68, 0.12); /* red-500 soft */
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: var(--radius-sm);
+    color: #fca5a5; /* red-300 */
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.6);
+    color: #fecaca; /* red-200 */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.btn-delete:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Optional: subtle glow on focus for accessibility */
+.btn-delete:focus-visible {
+    outline: 2px solid rgba(239, 68, 68, 0.6);
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-delete {
+        padding: 0.3rem 0.65rem;
+        font-size: 0.75rem;
+    }
+}
+
 /* ===== Answer Layout ===== */
 .answer-layout {
     display: flex;

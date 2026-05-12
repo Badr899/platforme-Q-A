@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Question
 from django.shortcuts import render, get_object_or_404, redirect
-from tag.models import Tag
-from answer.models import Answer
-from vote.models import Vote
 from django.db.models import Count, Q
 from django.contrib.admin.views.decorators import staff_member_required
 from .forms import QuestionForm
+from django.db.models import Count, Q
+from django.shortcuts import get_object_or_404, render
+from .models import Question
+
 
 
 
@@ -35,47 +36,31 @@ def create_question(request):
 
 
 
+
 def question_detail(request, id):
     question = get_object_or_404(Question, id=id)
 
+    # 🔥 incrément views (OK mais mieux en update)
     question.views += 1
-    question.save()
+    question.save(update_fields=["views"])
 
+    # 🔥 votes question (OPTIMISÉ)
+    question.upvotes = question.votes.filter(type_vote="up").count()
+    question.downvotes = question.votes.filter(type_vote="down").count()
+    question.score = question.upvotes - question.downvotes
+
+    # 🔥 answers avec votes (BON)
     answers = question.answers.select_related('auteur').annotate(
         upvotes=Count('votes', filter=Q(votes__type_vote="up")),
         downvotes=Count('votes', filter=Q(votes__type_vote="down")),
     )
-
-    question.upvotes = question.votes.filter(type_vote="up").count()
-    question.downvotes = question.votes.filter(type_vote="down").count()
 
     return render(request, "questions/detail.html", {
         "question": question,
         "answers": answers,
     })
 
-@login_required
-def vote_question(request, pk):
-    question = get_object_or_404(Question, pk=pk)
 
-    vote_type = request.POST.get("type_vote", "up")
-
-    vote = Vote.objects.filter(user=request.user, question=question).first()
-
-    if vote:
-        if vote.type_vote == vote_type:
-            vote.delete()
-        else:
-            vote.type_vote = vote_type
-            vote.save()
-    else:
-        Vote.objects.create(
-            user=request.user,
-            question=question,
-            type_vote=vote_type
-        )
-
-    return redirect('question_detail', id=pk)
 
 
 @staff_member_required

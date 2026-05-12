@@ -206,6 +206,83 @@ body > * { position: relative; z-index: 1; }
     font-weight: 700;
     box-shadow: 0 3px 10px rgba(99, 102, 241, 0.3);
 }
+/* ===== Vote Group - Question Header ===== */
+.vote-group-question {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.vote-group-question form {
+    display: inline;
+}
+
+.vote-group-question button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.75rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+/* Hover upvote - primary glow */
+.vote-group-question button:first-of-type:hover {
+    background: var(--primary);
+    color: var(--text-main);
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(154, 156, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Hover downvote - red accent */
+.vote-group-question button:last-of-type:hover {
+    background: var(--accent-red);
+    color: var(--text-main);
+    border-color: var(--accent-red);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Active state - subtle press effect */
+.vote-group-question button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Focus accessibility */
+.vote-group-question button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Locked message style (non-authenticated) */
+.vote-group-question + p,
+.header-inner > p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    background: var(--bg-elevated);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--border-subtle);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .vote-group-question {
+        gap: 0.3rem;
+    }
+    .vote-group-question button {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+}
 
 /* ===== 📦 MAIN WRAP ===== */
 .conversation-wrap {

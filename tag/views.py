@@ -2,7 +2,10 @@ from .models import Tag
 from django.shortcuts import render, redirect, get_object_or_404
 from question.models import Question
 from .forms import TagForm
+from django.contrib.admin.views.decorators import staff_member_required
 
+
+@staff_member_required
 def manage_tags(request):
 
     if request.method == "POST":
@@ -34,12 +37,14 @@ def tag_detail(request, id):
     })
 
 
+@staff_member_required
 def delete_tag(request, id):
     tag = get_object_or_404(Tag, id=id)
     tag.delete()
     return redirect('manage_tags')
 
 
+@staff_member_required
 def update_tag(request, id):
     tag = get_object_or_404(Tag, id=id)
 

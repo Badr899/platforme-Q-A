@@ -5,7 +5,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{{ question.titre }} — QA Platform</title>
-  <link rel="stylesheet" href="{% static 'css/detail-question.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/detail-questions.css' %}"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 
@@ -31,6 +31,33 @@
     <div class="header-center">
       <span class="breadcrumb">Question</span>
     </div>
+    {% if user.is_authenticated %}
+
+<div class="vote-group-question">
+
+  <!-- UP -->
+  <form method="POST" action="{% url 'vote_question' question.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="type_vote" value="up">
+    <button type="submit">
+      👍 {{ question.upvotes|default:0 }}
+    </button>
+  </form>
+
+  <!-- DOWN -->
+  <form method="POST" action="{% url 'vote_question' question.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="type_vote" value="down">
+    <button type="submit">
+      👎 {{ question.downvotes|default:0 }}
+    </button>
+  </form>
+
+</div>
+
+{% else %}
+<p>🔒 Connectez-vous pour voter</p>
+{% endif %}
     
     {% if user.is_authenticated %}
     <div class="user-mini">
@@ -84,8 +111,8 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat">
-          <span class="stat-value">{{ question.answers.all|length }}</span>
-          <span class="stat-label">votes</span>
+          <span class="stat-value">{{ question.score }}</span>
+          <span class="stat-label">votes-question</span>
         </div>
       </div>
 

@@ -5,7 +5,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mes Réponses — QA Platform</title>
-  <link rel="stylesheet" href="{% static 'css/answers-list.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/answers-lists.css' %}"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
@@ -70,7 +70,7 @@
           <!-- VOTES -->
           <div class="answer-votes">
             <span class="vote-number">{{ answer.score|default:0 }}</span>
-            <span class="vote-label">votes</span>
+            <span class="vote-label">votes-reponse</span>
           </div>
 
           <!-- CONTENT -->
@@ -93,6 +93,12 @@
                 </div>
               </div>
               <a href="{% url 'question_detail' answer.question.id %}" class="btn-view">Voir le contexte →</a>
+              {% if user == answer.auteur %}
+              <form method="POST" action="{% url 'delete_answer' answer.id %}" style="display:inline;">
+                {% csrf_token %}
+                 <button type="submit" class="btn-delete">🗑 Supprimer</button>
+               </form>
+            {% endif %}
             </div>
 
             <!-- COMMENTS -->
