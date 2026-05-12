@@ -87,24 +87,24 @@ def profile_view(request):
     questions = Question.objects.filter(auteur=user)
     answers = Answer.objects.filter(auteur=user)
 
-    # 👍 votes reçus sur ses questions
+    # Votes reçus sur ses questions
     q_up = Vote.objects.filter(question__auteur=user, type_vote="up").count()
     q_down = Vote.objects.filter(question__auteur=user, type_vote="down").count()
 
-    # 👍 votes reçus sur ses réponses
+    # Votes reçus sur ses réponses
     a_up = Vote.objects.filter(answer__auteur=user, type_vote="up").count()
     a_down = Vote.objects.filter(answer__auteur=user, type_vote="down").count()
 
-    # ⭐ REPUTATION FINAL
+    # Réputation
     reputation = (q_up + a_up) - (q_down + a_down)
 
     return render(request, "users/profile.html", {
         "questions": questions,
         "answers": answers,
-        "upvotes": q_up + a_up,
-        "downvotes": q_down + a_down,
+        "upvotes": q_up ,
+        "downvotes": q_down ,
+        "a_up": a_up,
         "reputation": reputation,
-        "votes_count": Vote.objects.filter(user=user).count(),
     })
 
 
